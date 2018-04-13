@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title><%= title %></title>
+    <link rel='stylesheet' href='/stylesheets/style.css' />
+    <script src="/javascripts/domParse.js"></script>
+    <script src="/javascripts/encode.js"></script>
+    <script>
+      var parse=function(str){
+          var results='';
+          try{
+              HTMLParse(he.unescape(str,{strict:true}),{
+                  start:function(tag,attrs,unary){//标签前半部分
+                      if(tag=='script'||tag=='style'||tag=="img"||tag=='link'||tag=='iframe'){
+                        return;
+                      }
+                    results+='<'+tag;
+                    /*for(var i=0;i<attrs.length;i++){
+                        results+=" "+attrs[i].name+'="'+attrs[i].escaped+'"';
+                    }*/
+                    results+=(unary?"/":"")+">";
+                  },end:function(tag){//结束标签
+                    results+="</"+tag+">";
+                  },chars:function(text){//中间文本
+                      results+=text;
+                  },comment:function(text){//注视
+                      results+="<!--"+test+">";
+                  }
+              });
+              return results;
+          }catch(e){
+              console.log(e);
+          }finally{
+
+          }
+      }
+    </script>
+  </head>
+  <body>
+    <h1><%= title %></h1>
+    <p>Welcome to <%= title %></p>
+
+    <textarea name="name" id="txt" cols="30" rows="10">
+      <p>sks <img src="null" onerror="alert(1)" alt=""></p>
+    </textarea>
+
+    <button type="button" name="button" id="btn">评论</button>
+    <button type="button" name="button" id="get">获取评论</button>
+
+    <script type="text/javascript">
+      var btn=document.getElementById('btn');
+      var get=document.getElementById('get');
+      var txt=document.getElementById('txt');
+
+      btn.addEventListener('click',function(){
+          var xhr=new XMLHttpRequest();
+          var url='/comment?comment='+txt.value;
+          xhr.open('GET',url,true);
+          xhr.onreadystatechange=function(){
+
+              if(xhr.readyState==4){
+                  if(xhr.status==200){
+                      console.log(xhr);
+                  }else{
+                      console.log('error');
+                  }
+              }
+          }
+          xhr.send();
+      })
+      get.addEventListener('click',function(){
+          var xhr=new XMLHttpRequest();
+          var url='/getComment';
+          xhr.open('GET',url,true);
+          xhr.onreadystatechange=function(){
+
+              if(xhr.readyState==4){
+                  if(xhr.status==200){
+                     var com=parse(JSON.parse(xhr.response).comment);
+                     var txt=document.createElement('span');
+                     txt.innerHTML=com;
+                     document.body.appendChild(txt);
+                  }else{
+                      console.log('error');
+                  }
+              }
+          }
+          xhr.send();
+      })
+    </script>
+  </body>
+</html>
